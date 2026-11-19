@@ -6,3 +6,6 @@
 
 # Configuracion local de Spring (no subir al repositorio)
 application.properties
+
+.idea/
+postman/
