@@ -1,0 +1,27 @@
+# Plantilla de configuracion. Copia este archivo como application.properties
+# y define la variable INTERNAL_KEY con tu valor.
+# No escribas valores reales en esta plantilla.
+
+spring.application.name=notificaciones
+server.port=${PORT:8084}
+
+# Este servicio no usa base de datos.
+
+# Clave que deben enviar los demas microservicios en el encabezado X-Internal-Key
+app.internal-key=${INTERNAL_KEY}
+
+# Correo por Gmail. La contrasena de aplicacion SOLO se define como variable de entorno.
+# GMAIL_USUARIO trae por defecto la cuenta remitente del proyecto: es la unica excepcion a esta plantilla.
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=${GMAIL_USUARIO:pozolesepes@gmail.com}
+spring.mail.password=${GMAIL_APP_PASSWORD:}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.connectiontimeout=5000
+spring.mail.properties.mail.smtp.timeout=5000
+spring.mail.properties.mail.smtp.writetimeout=5000
+
+# false: no se conecta a Gmail, solo registra en el log (usar asi en pruebas de carga y estres)
+app.correo.enabled=${CORREO_ENABLED:false}

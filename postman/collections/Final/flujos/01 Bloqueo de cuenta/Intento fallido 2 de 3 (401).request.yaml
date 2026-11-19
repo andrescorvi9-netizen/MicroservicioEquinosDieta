@@ -1,0 +1,29 @@
+$kind: http-request
+name: "Intento fallido 2 de 3 (401)"
+url: "{{usuarios_url}}/api/auth/login"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "correo": "{{correo_bloqueo}}",
+      "password": "incorrecta"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 401", function () {
+          pm.response.to.have.status(401);
+      });
+      pm.test("Cuerpo de error uniforme", function () {
+          const b = pm.response.json();
+          pm.expect(b.status).to.eql(401);
+          pm.expect(b).to.have.property("mensaje");
+      });
+order: 4000

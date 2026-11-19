@@ -1,0 +1,25 @@
+$kind: http-request
+name: "Error - JSON mal formado (400)"
+url: "{{notificaciones_url}}/api/internal/notificaciones"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+  - key: "X-Internal-Key"
+    value: "{{internal_key}}"
+body:
+  type: json
+  content: |-
+    {
+      "correo": 
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 400", function () {
+          pm.response.to.have.status(400);
+      });
+      pm.test("Devuelve el mensaje de error", function () {
+          pm.expect(pm.response.json().mensaje).to.include("JSON");
+      });
+order: 9000

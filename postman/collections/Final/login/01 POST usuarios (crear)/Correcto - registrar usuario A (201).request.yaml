@@ -1,0 +1,44 @@
+$kind: http-request
+name: "Correcto - registrar usuario A (201)"
+url: "{{usuarios_url}}/api/usuarios"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "nombre": "Ana Torres",
+      "correo": "{{correo}}",
+      "password": "{{password}}"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      // Datos unicos de la corrida: correos y codigos nuevos para poder repetirla sin limpiar la base
+      const ts = Date.now();
+      pm.environment.set("ts", String(ts));
+      pm.environment.set("correo", "ana." + ts + "@correo.com");
+      pm.environment.set("password", "EquinoDietaPrueba7319Xq");
+      pm.environment.set("correo_b", "beto." + ts + "@correo.com");
+      pm.environment.set("password_b", "ClaveBeto123");
+      pm.environment.set("codigo_caballo", "EQ-" + ts);
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 201", function () {
+          pm.response.to.have.status(201);
+      });
+      pm.test("Devuelve el usuario sin la contrasena", function () {
+          const b = pm.response.json();
+          pm.expect(b.id).to.be.a("number");
+          pm.expect(b.correo).to.eql(pm.environment.get("correo"));
+          pm.expect(b).to.not.have.property("password");
+          pm.expect(b).to.not.have.property("passwordHash");
+      });
+      pm.environment.set("id_usuario", pm.response.json().id);
+order: 1000

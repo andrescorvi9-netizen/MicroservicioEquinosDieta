@@ -1,0 +1,24 @@
+$kind: http-request
+name: "Correcto - cambiar estado de salud (200)"
+url: "{{caballos_url}}/api/caballos/{{id_caballo}}/estado-salud"
+method: PATCH
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "estadoSalud": "LAMINITIS"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Estado normalizado a minusculas", function () {
+          pm.expect(pm.response.json().estadoSalud).to.eql("laminitis");
+      });
+order: 1000

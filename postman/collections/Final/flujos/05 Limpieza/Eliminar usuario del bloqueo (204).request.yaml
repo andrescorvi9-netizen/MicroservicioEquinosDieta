@@ -1,0 +1,17 @@
+$kind: http-request
+name: "Eliminar usuario del bloqueo (204)"
+url: "{{usuarios_url}}/api/usuarios/{{id_usuario_bloqueo}}"
+method: DELETE
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: "{{token_bloqueo}}"
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 204", function () {
+          pm.response.to.have.status(204);
+      });
+order: 3000

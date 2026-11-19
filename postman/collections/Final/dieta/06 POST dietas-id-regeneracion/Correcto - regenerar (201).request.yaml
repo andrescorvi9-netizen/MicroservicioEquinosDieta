@@ -1,0 +1,19 @@
+$kind: http-request
+name: "Correcto - regenerar (201)"
+url: "{{dietas_url}}/api/dietas/{{id_dieta}}/regeneracion"
+method: POST
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 201", function () {
+          pm.response.to.have.status(201);
+      });
+      pm.test("Es una dieta nueva del mismo caballo", function () {
+          const b = pm.response.json();
+          pm.expect(b.id).to.not.eql(Number(pm.environment.get("id_dieta")));
+          pm.expect(b.caballoId).to.eql(Number(pm.environment.get("id_caballo")));
+          pm.expect(b.observaciones).to.eql("Revisar condicion corporal en 15 dias");
+      });
+      pm.environment.set("id_dieta_regenerada", pm.response.json().id);
+order: 1000

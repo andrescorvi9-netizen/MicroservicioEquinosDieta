@@ -1,0 +1,39 @@
+# Plantilla de configuracion. Copia este archivo como application.properties
+# y define las variables DB_PASSWORD, JWT_SECRET e INTERNAL_KEY con tus valores.
+# No escribas valores reales en esta plantilla.
+
+spring.application.name=dieta
+server.port=${PORT:8083}
+
+# Base de datos compartida; este servicio solo usa el esquema "dietas"
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/Equino_Dieta}
+spring.datasource.username=${DB_USER:postgres}
+spring.datasource.password=${DB_PASSWORD}
+spring.datasource.hikari.maximum-pool-size=5
+
+# Flyway crea el esquema y las tablas; Hibernate solo valida que coincidan con las entidades
+spring.flyway.schemas=dietas
+spring.flyway.default-schema=dietas
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.properties.hibernate.default_schema=dietas
+spring.jpa.open-in-view=false
+
+# Seguridad (definir como variables de entorno fuera del entorno local)
+app.jwt.secret=${JWT_SECRET}
+app.internal-key=${INTERNAL_KEY}
+
+# Otros microservicios
+app.caballos.url=${CABALLOS_URL:http://localhost:8082}
+app.notificaciones.url=${NOTIFICACIONES_URL:http://localhost:8084}
+
+# Archivo maestro del catalogo (se carga a la base la primera vez que arranca el servicio)
+app.catalogo.recurso=catalogo/dietas_equinos_maestro.json
+
+# API externa Open-Meteo (gratuita, sin clave). El clima es de un punto fijo de referencia.
+# Usar CLIMA_ENABLED=false en pruebas de carga y estres.
+app.clima.enabled=${CLIMA_ENABLED:true}
+app.clima.url=${CLIMA_URL:https://api.open-meteo.com}
+app.clima.latitud=${CLIMA_LATITUD:6.25}
+app.clima.longitud=${CLIMA_LONGITUD:-75.56}
+app.clima.nombre-zona=${CLIMA_ZONA:Medell\u00edn}
+app.clima.cache-minutos=${CLIMA_CACHE_MINUTOS:60}

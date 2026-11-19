@@ -1,0 +1,1895 @@
+{
+  "info": {
+    "_postman_id": "b3f9bd3d-5dba-54c5-876e-1be6772da620",
+    "name": "EquinosFinal",
+    "description": "CRUD + 5 endpoints de cada microservicio de C:\\EquinosFinal: login (8081), registro-caballo (8082) y dieta (8083), mas la ruta interna de notificaciones (8084). C, R, U y D marcan el CRUD (crear, consultar o listar, actualizar, eliminar); +1 a +5 son los endpoints adicionales. Importar tambien EquinosFinal.postman_environment.json, seleccionar el entorno DietaEquinos-local y ejecutar la coleccion completa en orden: cada peticion guarda las variables que usan las siguientes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "login",
+      "item": [
+        {
+          "name": "C - POST usuarios (registrar)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Datos unicos de la corrida: correos y codigos nuevos para poder repetirla sin limpiar la base",
+                  "const ts = Date.now();",
+                  "pm.environment.set(\"ts\", String(ts));",
+                  "pm.environment.set(\"correo\", \"ana.\" + ts + \"@correo.com\");",
+                  "pm.environment.set(\"password\", \"EquinoDietaPrueba7319Xq\");",
+                  "pm.environment.set(\"codigo_caballo\", \"EQ-\" + ts);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Devuelve el usuario sin la contrasena\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.id).to.be.a(\"number\");",
+                  "    pm.expect(b.correo).to.eql(pm.environment.get(\"correo\"));",
+                  "    pm.expect(b).to.not.have.property(\"password\");",
+                  "    pm.expect(b).to.not.have.property(\"passwordHash\");",
+                  "});",
+                  "pm.environment.set(\"id_usuario\", pm.response.json().id);",
+                  "// Deja la sesion iniciada para las peticiones siguientes (equivale a POST /api/auth/login)",
+                  "if (pm.response.code === 201) {",
+                  "    pm.sendRequest({",
+                  "        url: pm.environment.get(\"usuarios_url\") + \"/api/auth/login\",",
+                  "        method: \"POST\",",
+                  "        header: { \"Content-Type\": \"application/json\" },",
+                  "        body: { mode: \"raw\", raw: JSON.stringify({ correo: pm.environment.get(\"correo\"), password: pm.environment.get(\"password\") }) }",
+                  "    }, function (err, res) {",
+                  "        pm.test(\"Sesion iniciada para las siguientes peticiones\", function () {",
+                  "            pm.expect(err).to.eql(null);",
+                  "            pm.expect(res.code).to.eql(200);",
+                  "        });",
+                  "        pm.environment.set(\"token\", res.json().token);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{usuarios_url}}/api/usuarios",
+              "host": [
+                "{{usuarios_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana Torres\",\n  \"correo\": \"{{correo}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "R - GET usuarios-id (consultar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Es la cuenta propia\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.id).to.eql(Number(pm.environment.get(\"id_usuario\")));",
+                  "    pm.expect(b.nombre).to.eql(\"Ana Torres\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{usuarios_url}}/api/usuarios/{{id_usuario}}",
+              "host": [
+                "{{usuarios_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{id_usuario}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "U - PUT usuarios-id (actualizar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Nombre actualizado\", function () {",
+                  "    pm.expect(pm.response.json().nombre).to.eql(\"Ana Maria Torres\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{usuarios_url}}/api/usuarios/{{id_usuario}}",
+              "host": [
+                "{{usuarios_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{id_usuario}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana Maria Torres\",\n  \"correo\": \"{{correo}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+1 GET usuarios-disponibilidad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"disponible = true\", function () {",
+                  "    pm.expect(pm.response.json().disponible).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{usuarios_url}}/api/usuarios/disponibilidad?correo=libre.{{ts}}@correo.com",
+              "host": [
+                "{{usuarios_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "disponibilidad"
+              ],
+              "query": [
+                {
+                  "key": "correo",
+                  "value": "libre.{{ts}}@correo.com"
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+2 POST auth-login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Entrega un token Bearer del usuario A\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.tipo).to.eql(\"Bearer\");",
+                  "    pm.expect(b.token).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(b.usuario.id).to.eql(Number(pm.environment.get(\"id_usuario\")));",
+                  "});",
+                  "pm.environment.set(\"token\", pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{usuarios_url}}/api/auth/login",
+              "host": [
+                "{{usuarios_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+3 GET auth-perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Datos del usuario A\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.id).to.eql(Number(pm.environment.get(\"id_usuario\")));",
+                  "    pm.expect(b.nombre).to.eql(\"Ana Maria Torres\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{usuarios_url}}/api/auth/perfil",
+              "host": [
+                "{{usuarios_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "perfil"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+4 PUT usuarios-id-password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "if (pm.response.code === 204) { pm.environment.set(\"password\", \"EquinoDietaNueva8426Zk\"); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{usuarios_url}}/api/usuarios/{{id_usuario}}/password",
+              "host": [
+                "{{usuarios_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{id_usuario}}",
+                "password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"passwordActual\": \"{{password}}\",\n  \"passwordNueva\": \"EquinoDietaNueva8426Zk\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+5 POST auth-renovacion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Entrega un token nuevo del usuario A\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.tipo).to.eql(\"Bearer\");",
+                  "    pm.expect(b.usuario.id).to.eql(Number(pm.environment.get(\"id_usuario\")));",
+                  "});",
+                  "pm.environment.set(\"token\", pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{usuarios_url}}/api/auth/renovacion",
+              "host": [
+                "{{usuarios_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "renovacion"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "D - DELETE usuarios-id (eliminar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Se elimina un usuario desechable (no el usuario A, que usan las carpetas siguientes):",
+                  "// se registra y se inicia sesion con el antes de enviar el DELETE.",
+                  "const base = pm.environment.get(\"usuarios_url\");",
+                  "const correoD = \"desechable.\" + pm.environment.get(\"ts\") + \"@correo.com\";",
+                  "const cuerpo = (o) => ({ mode: \"raw\", raw: JSON.stringify(o) });",
+                  "const json = { \"Content-Type\": \"application/json\" };",
+                  "pm.sendRequest({ url: base + \"/api/usuarios\", method: \"POST\", header: json,",
+                  "        body: cuerpo({ nombre: \"Usuario Desechable\", correo: correoD, password: \"EquinoDietaPrueba7319Xq\" }) }, function (e1, r1) {",
+                  "    pm.environment.set(\"id_usuario_d\", r1.json().id);",
+                  "    pm.sendRequest({ url: base + \"/api/auth/login\", method: \"POST\", header: json,",
+                  "            body: cuerpo({ correo: correoD, password: \"EquinoDietaPrueba7319Xq\" }) }, function (e2, r2) {",
+                  "        pm.environment.set(\"token_d\", r2.json().token);",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{usuarios_url}}/api/usuarios/{{id_usuario_d}}",
+              "host": [
+                "{{usuarios_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{id_usuario_d}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_d}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "registro-caballo",
+      "item": [
+        {
+          "name": "C - POST caballos (registrar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Caballo activo con los datos enviados\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.id).to.be.a(\"number\");",
+                  "    pm.expect(b.activo).to.eql(true);",
+                  "    pm.expect(b.codigo).to.eql(pm.environment.get(\"codigo_caballo\"));",
+                  "    pm.expect(b.categoria).to.eql(\"adulto\");",
+                  "    pm.expect(b.estadoSalud).to.eql(\"laminitis\");",
+                  "});",
+                  "pm.environment.set(\"id_caballo\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{caballos_url}}/api/caballos",
+              "host": [
+                "{{caballos_url}}"
+              ],
+              "path": [
+                "api",
+                "caballos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Trueno\",\n  \"codigo\": \"{{codigo_caballo}}\",\n  \"pesoKg\": 500.0,\n  \"categoria\": \"adulto\",\n  \"estadoSalud\": \"laminitis\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "R - GET caballos-id (consultar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Es el caballo registrado\", function () {",
+                  "    pm.expect(pm.response.json().nombre).to.eql(\"Trueno\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{caballos_url}}/api/caballos/{{id_caballo}}",
+              "host": [
+                "{{caballos_url}}"
+              ],
+              "path": [
+                "api",
+                "caballos",
+                "{{id_caballo}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "R - GET caballos (listar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Pagina con el caballo del usuario\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.pagina).to.eql(0);",
+                  "    pm.expect(b.tamano).to.eql(10);",
+                  "    pm.expect(b.totalElementos).to.eql(1);",
+                  "    pm.expect(b.contenido.map(c => c.id)).to.include(Number(pm.environment.get(\"id_caballo\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{caballos_url}}/api/caballos?page=0&size=10",
+              "host": [
+                "{{caballos_url}}"
+              ],
+              "path": [
+                "api",
+                "caballos"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "U - PUT caballos-id (actualizar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Datos actualizados\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.nombre).to.eql(\"Trueno II\");",
+                  "    pm.expect(b.pesoKg).to.eql(510);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{caballos_url}}/api/caballos/{{id_caballo}}",
+              "host": [
+                "{{caballos_url}}"
+              ],
+              "path": [
+                "api",
+                "caballos",
+                "{{id_caballo}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Trueno II\",\n  \"codigo\": \"{{codigo_caballo}}\",\n  \"pesoKg\": 510.0,\n  \"categoria\": \"adulto\",\n  \"estadoSalud\": \"laminitis\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+1 POST caballos-id-reactivacion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Vuelve a estar activo\", function () {",
+                  "    pm.expect(pm.response.json().activo).to.eql(true);",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Solo se reactiva un caballo dado de baja: se registra un segundo caballo y se da de baja",
+                  "// antes de enviar la reactivacion. Ese mismo caballo es el que borra la peticion D.",
+                  "const base = pm.environment.get(\"caballos_url\");",
+                  "const auth = { \"Authorization\": \"Bearer \" + pm.environment.get(\"token\"), \"Content-Type\": \"application/json\" };",
+                  "pm.environment.set(\"codigo_caballo_2\", pm.environment.get(\"codigo_caballo\") + \"-B\");",
+                  "pm.sendRequest({ url: base + \"/api/caballos\", method: \"POST\", header: auth,",
+                  "        body: { mode: \"raw\", raw: JSON.stringify({ nombre: \"Brisa\", codigo: pm.environment.get(\"codigo_caballo_2\"),",
+                  "            pesoKg: 320.5, categoria: \"joven\", estadoSalud: \"sin_complicaciones\" }) } }, function (e1, r1) {",
+                  "    pm.environment.set(\"id_caballo_2\", r1.json().id);",
+                  "    pm.sendRequest({ url: base + \"/api/caballos/\" + r1.json().id, method: \"DELETE\", header: auth }, function () {});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{caballos_url}}/api/caballos/{{id_caballo_2}}/reactivacion",
+              "host": [
+                "{{caballos_url}}"
+              ],
+              "path": [
+                "api",
+                "caballos",
+                "{{id_caballo_2}}",
+                "reactivacion"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+2 PATCH caballos-id-estado-salud",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Estado normalizado a minusculas\", function () {",
+                  "    pm.expect(pm.response.json().estadoSalud).to.eql(\"laminitis\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{caballos_url}}/api/caballos/{{id_caballo}}/estado-salud",
+              "host": [
+                "{{caballos_url}}"
+              ],
+              "path": [
+                "api",
+                "caballos",
+                "{{id_caballo}}",
+                "estado-salud"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estadoSalud\": \"LAMINITIS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+3 PATCH caballos-id-peso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Peso actualizado\", function () {",
+                  "    pm.expect(pm.response.json().pesoKg).to.eql(500.25);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{caballos_url}}/api/caballos/{{id_caballo}}/peso",
+              "host": [
+                "{{caballos_url}}"
+              ],
+              "path": [
+                "api",
+                "caballos",
+                "{{id_caballo}}",
+                "peso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pesoKg\": 500.25\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+4 GET caballos-codigo-codigo",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.environment.set(\"codigo_caballo_min\", pm.environment.get(\"codigo_caballo\").toLowerCase());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Encuentra el caballo\", function () {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.environment.get(\"id_caballo\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{caballos_url}}/api/caballos/codigo/{{codigo_caballo_min}}",
+              "host": [
+                "{{caballos_url}}"
+              ],
+              "path": [
+                "api",
+                "caballos",
+                "codigo",
+                "{{codigo_caballo_min}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+5 GET caballos-busqueda",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Pagina filtrada\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b).to.have.all.keys(\"contenido\", \"pagina\", \"tamano\", \"totalElementos\", \"totalPaginas\");",
+                  "    pm.expect(b.totalElementos).to.eql(1);",
+                  "    b.contenido.forEach(c => { pm.expect(c.categoria).to.eql(\"adulto\"); pm.expect(c.estadoSalud).to.eql(\"laminitis\"); });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{caballos_url}}/api/caballos/busqueda?categoria=adulto&estado=laminitis&page=0&size=10",
+              "host": [
+                "{{caballos_url}}"
+              ],
+              "path": [
+                "api",
+                "caballos",
+                "busqueda"
+              ],
+              "query": [
+                {
+                  "key": "categoria",
+                  "value": "adulto"
+                },
+                {
+                  "key": "estado",
+                  "value": "laminitis"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "D - DELETE caballos-id (eliminar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{caballos_url}}/api/caballos/{{id_caballo_2}}",
+              "host": [
+                "{{caballos_url}}"
+              ],
+              "path": [
+                "api",
+                "caballos",
+                "{{id_caballo_2}}"
+              ]
+            },
+            "description": "Se borra el segundo caballo; el primero lo siguen usando dieta y flujos."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "dieta",
+      "item": [
+        {
+          "name": "C - POST dietas (generar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Copia los datos del caballo y calcula con su peso (500.25 kg)\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.caballoId).to.eql(Number(pm.environment.get(\"id_caballo\")));",
+                  "    pm.expect(b.caballoNombre).to.eql(\"Trueno II\");",
+                  "    pm.expect(b.caballoCodigo).to.eql(pm.environment.get(\"codigo_caballo\"));",
+                  "    pm.expect(b.pesoKg).to.eql(500.25);",
+                  "    pm.expect(b.racion.materiaSecaTotalKgDia).to.eql(7.5);",
+                  "    pm.expect(b.racion.forrajeKgDia).to.eql(7.12);",
+                  "    pm.expect(b.racion.concentradoKgDia).to.eql(0.38);",
+                  "});",
+                  "pm.test(\"Incluye el aviso de que no es un diagnostico\", function () {",
+                  "    pm.expect(pm.response.json().aviso).to.include(\"No es un diagnóstico veterinario\");",
+                  "});",
+                  "pm.environment.set(\"id_dieta\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{dietas_url}}/api/dietas",
+              "host": [
+                "{{dietas_url}}"
+              ],
+              "path": [
+                "api",
+                "dietas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"caballoId\": {{id_caballo}},\n  \"observaciones\": \"Primera dieta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "R - GET dietas-id (consultar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Trae perfil y racion\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.id).to.eql(Number(pm.environment.get(\"id_dieta\")));",
+                  "    pm.expect(b.perfil.categoria).to.eql(\"adulto\");",
+                  "    pm.expect(b.perfil.estadoSalud).to.eql(\"laminitis\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{dietas_url}}/api/dietas/{{id_dieta}}",
+              "host": [
+                "{{dietas_url}}"
+              ],
+              "path": [
+                "api",
+                "dietas",
+                "{{id_dieta}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "R - GET dietas (listar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Contiene la dieta generada\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.totalElementos).to.eql(1);",
+                  "    pm.expect(b.contenido[0].id).to.eql(Number(pm.environment.get(\"id_dieta\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{dietas_url}}/api/dietas?page=0&size=10",
+              "host": [
+                "{{dietas_url}}"
+              ],
+              "path": [
+                "api",
+                "dietas"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "U - PUT dietas-id (actualizar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Observaciones guardadas\", function () {",
+                  "    pm.expect(pm.response.json().observaciones).to.eql(\"Revisar condicion corporal en 15 dias\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{dietas_url}}/api/dietas/{{id_dieta}}",
+              "host": [
+                "{{dietas_url}}"
+              ],
+              "path": [
+                "api",
+                "dietas",
+                "{{id_dieta}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observaciones\": \"Revisar condicion corporal en 15 dias\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+1 POST dietas-vista-previa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Racion 7.5 / 7.12 / 0.38 kg\", function () {",
+                  "    const r = pm.response.json().racion;",
+                  "    pm.expect(r.materiaSecaTotalKgDia).to.eql(7.5);",
+                  "    pm.expect(r.forrajeKgDia).to.eql(7.12);",
+                  "    pm.expect(r.concentradoKgDia).to.eql(0.38);",
+                  "});",
+                  "pm.test(\"Incluye el aviso\", function () {",
+                  "    pm.expect(pm.response.json().aviso).to.include(\"No es un diagnóstico veterinario\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{dietas_url}}/api/dietas/vista-previa",
+              "host": [
+                "{{dietas_url}}"
+              ],
+              "path": [
+                "api",
+                "dietas",
+                "vista-previa"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoria\": \"adulto\",\n  \"estadoSalud\": \"laminitis\",\n  \"pesoKg\": 500.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+2 POST dietas-id-regeneracion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Es una dieta nueva del mismo caballo\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.id).to.not.eql(Number(pm.environment.get(\"id_dieta\")));",
+                  "    pm.expect(b.caballoId).to.eql(Number(pm.environment.get(\"id_caballo\")));",
+                  "    pm.expect(b.observaciones).to.eql(\"Revisar condicion corporal en 15 dias\");",
+                  "});",
+                  "pm.environment.set(\"id_dieta_regenerada\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{dietas_url}}/api/dietas/{{id_dieta}}/regeneracion",
+              "host": [
+                "{{dietas_url}}"
+              ],
+              "path": [
+                "api",
+                "dietas",
+                "{{id_dieta}}",
+                "regeneracion"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+3 GET dietas-caballo-caballoId-vigente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"vigente = regenerada\", function () {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.environment.get(\"id_dieta_regenerada\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{dietas_url}}/api/dietas/caballo/{{id_caballo}}/vigente",
+              "host": [
+                "{{dietas_url}}"
+              ],
+              "path": [
+                "api",
+                "dietas",
+                "caballo",
+                "{{id_caballo}}",
+                "vigente"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+4 GET dietas-caballo-caballoId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Pagina con la original y la regenerada\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b).to.have.all.keys(\"contenido\", \"pagina\", \"tamano\", \"totalElementos\", \"totalPaginas\");",
+                  "    pm.expect(b.totalElementos).to.eql(2);",
+                  "    b.contenido.forEach(d => pm.expect(d.caballoId).to.eql(Number(pm.environment.get(\"id_caballo\"))));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{dietas_url}}/api/dietas/caballo/{{id_caballo}}?page=0&size=10",
+              "host": [
+                "{{dietas_url}}"
+              ],
+              "path": [
+                "api",
+                "dietas",
+                "caballo",
+                "{{id_caballo}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "+5 GET dietas-perfiles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"El catalogo tiene 15 perfiles\", function () {",
+                  "    pm.expect(pm.response.json().length).to.eql(15);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{dietas_url}}/api/dietas/perfiles",
+              "host": [
+                "{{dietas_url}}"
+              ],
+              "path": [
+                "api",
+                "dietas",
+                "perfiles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "D - DELETE dietas-id (eliminar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{dietas_url}}/api/dietas/{{id_dieta_regenerada}}",
+              "host": [
+                "{{dietas_url}}"
+              ],
+              "path": [
+                "api",
+                "dietas",
+                "{{id_dieta_regenerada}}"
+              ]
+            },
+            "description": "Se elimina la regenerada; la original la siguen usando los flujos."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "notificaciones",
+      "auth": {
+        "type": "noauth"
+      },
+      "item": [
+        {
+          "name": "Correcto - bienvenida (202)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 202\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "pm.test(\"No devuelve cuerpo\", function () {",
+                  "    pm.expect(pm.response.text()).to.eql(\"\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notificaciones_url}}/api/internal/notificaciones",
+              "host": [
+                "{{notificaciones_url}}"
+              ],
+              "path": [
+                "api",
+                "internal",
+                "notificaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo_notificacion}}\",\n  \"nombre\": \"Prueba Postman\",\n  \"tipo\": \"BIENVENIDA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Correcto - contrasena cambiada (202)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 202\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "pm.test(\"No devuelve cuerpo\", function () {",
+                  "    pm.expect(pm.response.text()).to.eql(\"\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notificaciones_url}}/api/internal/notificaciones",
+              "host": [
+                "{{notificaciones_url}}"
+              ],
+              "path": [
+                "api",
+                "internal",
+                "notificaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo_notificacion}}\",\n  \"nombre\": \"Prueba Postman\",\n  \"tipo\": \"CONTRASENA_CAMBIADA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Correcto - dieta generada (202)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 202\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "pm.test(\"No devuelve cuerpo\", function () {",
+                  "    pm.expect(pm.response.text()).to.eql(\"\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notificaciones_url}}/api/internal/notificaciones",
+              "host": [
+                "{{notificaciones_url}}"
+              ],
+              "path": [
+                "api",
+                "internal",
+                "notificaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo_notificacion}}\",\n  \"nombre\": \"Prueba Postman\",\n  \"tipo\": \"DIETA_GENERADA\",\n  \"datos\": {\n    \"caballo\": \"Trueno\",\n    \"codigo\": \"EQ-001\",\n    \"msTotalKg\": \"7.21\",\n    \"forrajeKg\": \"6.85\",\n    \"concentradoKg\": \"0.36\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Correcto - estado de salud cambiado (202)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 202\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "pm.test(\"No devuelve cuerpo\", function () {",
+                  "    pm.expect(pm.response.text()).to.eql(\"\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notificaciones_url}}/api/internal/notificaciones",
+              "host": [
+                "{{notificaciones_url}}"
+              ],
+              "path": [
+                "api",
+                "internal",
+                "notificaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo_notificacion}}\",\n  \"nombre\": \"Prueba Postman\",\n  \"tipo\": \"ESTADO_SALUD_CAMBIADO\",\n  \"datos\": {\n    \"caballo\": \"Trueno\",\n    \"codigo\": \"EQ-001\",\n    \"estadoSalud\": \"colicos\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Error - sin clave interna (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "pm.test(\"Devuelve el mensaje de error\", function () {",
+                  "    pm.expect(pm.response.json().mensaje).to.include(\"X-Internal-Key\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{notificaciones_url}}/api/internal/notificaciones",
+              "host": [
+                "{{notificaciones_url}}"
+              ],
+              "path": [
+                "api",
+                "internal",
+                "notificaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo_notificacion}}\",\n  \"nombre\": \"Prueba Postman\",\n  \"tipo\": \"BIENVENIDA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Error - clave interna incorrecta (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "pm.test(\"Devuelve el mensaje de error\", function () {",
+                  "    pm.expect(pm.response.json().mensaje).to.include(\"X-Internal-Key\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "clave-equivocada"
+              }
+            ],
+            "url": {
+              "raw": "{{notificaciones_url}}/api/internal/notificaciones",
+              "host": [
+                "{{notificaciones_url}}"
+              ],
+              "path": [
+                "api",
+                "internal",
+                "notificaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo_notificacion}}\",\n  \"nombre\": \"Prueba Postman\",\n  \"tipo\": \"BIENVENIDA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Error - correo invalido (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Devuelve el mensaje de error\", function () {",
+                  "    pm.expect(pm.response.json().mensaje).to.include(\"Los datos enviados no son\");",
+                  "});",
+                  "pm.test(\"Senala el campo correo\", function () {",
+                  "    pm.expect(pm.response.json().detalles.join(\" \")).to.include(\"correo\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notificaciones_url}}/api/internal/notificaciones",
+              "host": [
+                "{{notificaciones_url}}"
+              ],
+              "path": [
+                "api",
+                "internal",
+                "notificaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"correo-invalido\",\n  \"nombre\": \"Prueba Postman\",\n  \"tipo\": \"BIENVENIDA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Error - tipo inexistente (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Devuelve el mensaje de error\", function () {",
+                  "    pm.expect(pm.response.json().mensaje).to.include(\"JSON\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notificaciones_url}}/api/internal/notificaciones",
+              "host": [
+                "{{notificaciones_url}}"
+              ],
+              "path": [
+                "api",
+                "internal",
+                "notificaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo_notificacion}}\",\n  \"nombre\": \"Prueba Postman\",\n  \"tipo\": \"OTRO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Error - JSON mal formado (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Devuelve el mensaje de error\", function () {",
+                  "    pm.expect(pm.response.json().mensaje).to.include(\"JSON\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notificaciones_url}}/api/internal/notificaciones",
+              "host": [
+                "{{notificaciones_url}}"
+              ],
+              "path": [
+                "api",
+                "internal",
+                "notificaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

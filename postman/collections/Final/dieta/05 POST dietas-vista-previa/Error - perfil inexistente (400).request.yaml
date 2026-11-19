@@ -1,0 +1,28 @@
+$kind: http-request
+name: "Error - perfil inexistente (400)"
+url: "{{dietas_url}}/api/dietas/vista-previa"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "categoria": "anciano",
+      "estadoSalud": "laminitis",
+      "pesoKg": 500
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 400", function () {
+          pm.response.to.have.status(400);
+      });
+      pm.test("Cuerpo de error uniforme", function () {
+          const b = pm.response.json();
+          pm.expect(b.status).to.eql(400);
+          pm.expect(b).to.have.property("mensaje");
+      });
+order: 3000

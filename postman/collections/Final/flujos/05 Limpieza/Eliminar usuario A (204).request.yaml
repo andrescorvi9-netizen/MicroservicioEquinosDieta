@@ -1,0 +1,12 @@
+$kind: http-request
+name: "Eliminar usuario A (204)"
+url: "{{usuarios_url}}/api/usuarios/{{id_usuario}}"
+method: DELETE
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 204", function () {
+          pm.response.to.have.status(204);
+      });
+order: 1000

@@ -1,0 +1,27 @@
+$kind: http-request
+name: "Error - cuenta ajena (404)"
+url: "{{usuarios_url}}/api/usuarios/{{id_usuario_b}}"
+method: PUT
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "nombre": "Intruso",
+      "correo": "{{correo_b}}"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 404", function () {
+          pm.response.to.have.status(404);
+      });
+      pm.test("Cuerpo de error uniforme", function () {
+          const b = pm.response.json();
+          pm.expect(b.status).to.eql(404);
+          pm.expect(b).to.have.property("mensaje");
+      });
+order: 4000

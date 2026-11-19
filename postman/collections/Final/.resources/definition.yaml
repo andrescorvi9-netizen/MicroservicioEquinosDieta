@@ -1,0 +1,8 @@
+$kind: collection
+name: Final
+description: "Pruebas de los microservicios de C:\\EquinosFinal (login 8081, registro-caballo 8082, dieta 8083, notificaciones 8084). Ejecutar completa y en orden con el entorno DietaEquinos-local: login, registro-caballo, dieta, notificaciones, flujos. Cada corrida genera correos y codigos nuevos y al final elimina los usuarios de prueba."
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'

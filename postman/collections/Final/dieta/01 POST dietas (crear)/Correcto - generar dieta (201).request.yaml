@@ -1,0 +1,36 @@
+$kind: http-request
+name: "Correcto - generar dieta (201)"
+url: "{{dietas_url}}/api/dietas"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "caballoId": {{id_caballo}},
+      "observaciones": "Primera dieta"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 201", function () {
+          pm.response.to.have.status(201);
+      });
+      pm.test("Copia los datos del caballo y calcula con su peso (500.25 kg)", function () {
+          const b = pm.response.json();
+          pm.expect(b.caballoId).to.eql(Number(pm.environment.get("id_caballo")));
+          pm.expect(b.caballoNombre).to.eql("Trueno II");
+          pm.expect(b.caballoCodigo).to.eql(pm.environment.get("codigo_caballo"));
+          pm.expect(b.pesoKg).to.eql(500.25);
+          pm.expect(b.racion.materiaSecaTotalKgDia).to.eql(7.5);
+          pm.expect(b.racion.forrajeKgDia).to.eql(7.12);
+          pm.expect(b.racion.concentradoKgDia).to.eql(0.38);
+      });
+      pm.test("Incluye el aviso de que no es un diagnostico", function () {
+          pm.expect(pm.response.json().aviso).to.include("No es un diagnóstico veterinario");
+      });
+      pm.environment.set("id_dieta", pm.response.json().id);
+order: 1000

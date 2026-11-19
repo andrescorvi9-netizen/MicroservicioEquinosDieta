@@ -1,0 +1,15 @@
+$kind: http-request
+name: "Correcto - la regenerada es la vigente (200)"
+url: "{{dietas_url}}/api/dietas/caballo/{{id_caballo}}/vigente"
+method: GET
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("vigente = regenerada", function () {
+          pm.expect(pm.response.json().id).to.eql(Number(pm.environment.get("id_dieta_regenerada")));
+      });
+order: 1000

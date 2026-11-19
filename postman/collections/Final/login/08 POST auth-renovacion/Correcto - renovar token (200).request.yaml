@@ -1,0 +1,18 @@
+$kind: http-request
+name: "Correcto - renovar token (200)"
+url: "{{usuarios_url}}/api/auth/renovacion"
+method: POST
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Entrega un token nuevo del usuario A", function () {
+          const b = pm.response.json();
+          pm.expect(b.tipo).to.eql("Bearer");
+          pm.expect(b.usuario.id).to.eql(Number(pm.environment.get("id_usuario")));
+      });
+      pm.environment.set("token", pm.response.json().token);
+order: 1000

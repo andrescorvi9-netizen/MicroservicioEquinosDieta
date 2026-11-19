@@ -1,0 +1,12 @@
+$kind: http-request
+name: "La dieta de A sigue existiendo (200)"
+url: "{{dietas_url}}/api/dietas/{{id_dieta}}"
+method: GET
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+order: 7000

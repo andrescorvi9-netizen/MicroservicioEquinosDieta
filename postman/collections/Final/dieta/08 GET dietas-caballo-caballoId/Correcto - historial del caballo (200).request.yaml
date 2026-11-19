@@ -1,0 +1,23 @@
+$kind: http-request
+name: "Correcto - historial del caballo (200)"
+url: "{{dietas_url}}/api/dietas/caballo/{{id_caballo}}?page=0&size=10"
+method: GET
+queryParams:
+  - key: "page"
+    value: "0"
+  - key: "size"
+    value: "10"
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Pagina con la original y la regenerada", function () {
+          const b = pm.response.json();
+          pm.expect(b).to.have.all.keys("contenido", "pagina", "tamano", "totalElementos", "totalPaginas");
+          pm.expect(b.totalElementos).to.eql(2);
+          b.contenido.forEach(d => pm.expect(d.caballoId).to.eql(Number(pm.environment.get("id_caballo"))));
+      });
+order: 1000

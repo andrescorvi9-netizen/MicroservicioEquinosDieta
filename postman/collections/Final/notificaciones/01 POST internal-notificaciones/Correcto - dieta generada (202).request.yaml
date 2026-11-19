@@ -1,0 +1,35 @@
+$kind: http-request
+name: "Correcto - dieta generada (202)"
+url: "{{notificaciones_url}}/api/internal/notificaciones"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+  - key: "X-Internal-Key"
+    value: "{{internal_key}}"
+body:
+  type: json
+  content: |-
+    {
+      "correo": "{{correo_notificacion}}",
+      "nombre": "Prueba Postman",
+      "tipo": "DIETA_GENERADA",
+      "datos": {
+        "caballo": "Trueno",
+        "codigo": "EQ-001",
+        "msTotalKg": "7.21",
+        "forrajeKg": "6.85",
+        "concentradoKg": "0.36"
+      }
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 202", function () {
+          pm.response.to.have.status(202);
+      });
+      pm.test("No devuelve cuerpo", function () {
+          pm.expect(pm.response.text()).to.eql("");
+      });
+order: 3000

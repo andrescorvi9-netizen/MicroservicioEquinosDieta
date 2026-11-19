@@ -1,0 +1,31 @@
+$kind: http-request
+name: "Preparacion - registrar usuario D desechable (201)"
+description: "La eliminacion se prueba con un usuario aparte, para no romper las carpetas siguientes."
+url: "{{usuarios_url}}/api/usuarios"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "nombre": "Usuario Desechable",
+      "correo": "{{correo_d}}",
+      "password": "EquinoDietaPrueba7319Xq"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      pm.environment.set("correo_d", "desechable." + pm.environment.get("ts") + "@correo.com");
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 201", function () {
+          pm.response.to.have.status(201);
+      });
+      pm.environment.set("id_usuario_d", pm.response.json().id);
+order: 1000

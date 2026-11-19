@@ -1,0 +1,8 @@
+# Variables de entorno (nunca subir valores reales)
+.env
+.env.*
+*.env
+!.env.example
+
+# Configuracion local de Spring (no subir al repositorio)
+application.properties

@@ -1,0 +1,22 @@
+$kind: http-request
+name: "Error - paginacion no valida (400)"
+url: "{{dietas_url}}/api/dietas/caballo/{{id_caballo}}?page=0&size=101"
+method: GET
+queryParams:
+  - key: "page"
+    value: "0"
+  - key: "size"
+    value: "101"
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 400", function () {
+          pm.response.to.have.status(400);
+      });
+      pm.test("Cuerpo de error uniforme", function () {
+          const b = pm.response.json();
+          pm.expect(b.status).to.eql(400);
+          pm.expect(b).to.have.property("mensaje");
+      });
+order: 3000

@@ -1,0 +1,24 @@
+$kind: http-request
+name: "Correcto - actualizar peso (200)"
+url: "{{caballos_url}}/api/caballos/{{id_caballo}}/peso"
+method: PATCH
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "pesoKg": 500.25
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Peso actualizado", function () {
+          pm.expect(pm.response.json().pesoKg).to.eql(500.25);
+      });
+order: 1000

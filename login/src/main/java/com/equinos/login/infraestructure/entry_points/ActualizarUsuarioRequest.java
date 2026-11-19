@@ -1,0 +1,13 @@
+package com.equinos.login.infraestructure.entry_points;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record ActualizarUsuarioRequest(
+        @NotBlank(message = "es obligatorio") @Size(max = 120, message = "admite máximo 120 caracteres")
+        String nombre,
+        @NotBlank(message = "es obligatorio") @Email(message = "no es un correo válido")
+        @Size(max = 160, message = "admite máximo 160 caracteres")
+        String correo) {
+}

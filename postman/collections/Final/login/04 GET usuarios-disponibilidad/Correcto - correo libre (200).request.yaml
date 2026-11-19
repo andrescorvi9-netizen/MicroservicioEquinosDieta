@@ -1,0 +1,20 @@
+$kind: http-request
+name: "Correcto - correo libre (200)"
+url: "{{usuarios_url}}/api/usuarios/disponibilidad?correo=libre.{{ts}}@correo.com"
+method: GET
+queryParams:
+  - key: "correo"
+    value: "libre.{{ts}}@correo.com"
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("disponible = true", function () {
+          pm.expect(pm.response.json().disponible).to.eql(true);
+      });
+order: 1000

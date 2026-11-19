@@ -1,0 +1,27 @@
+$kind: http-request
+name: "La vista previa da la misma racion (200)"
+url: "{{dietas_url}}/api/dietas/vista-previa"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "categoria": "adulto",
+      "estadoSalud": "laminitis",
+      "pesoKg": 480.5
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("7.21 / 6.85 / 0.36", function () {
+          const r = pm.response.json().racion;
+          pm.expect([r.materiaSecaTotalKgDia, r.forrajeKgDia, r.concentradoKgDia]).to.eql([7.21, 6.85, 0.36]);
+      });
+order: 3000

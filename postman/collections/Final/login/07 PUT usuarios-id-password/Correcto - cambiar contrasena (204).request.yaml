@@ -1,0 +1,23 @@
+$kind: http-request
+name: "Correcto - cambiar contrasena (204)"
+url: "{{usuarios_url}}/api/usuarios/{{id_usuario}}/password"
+method: PUT
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "passwordActual": "{{password}}",
+      "passwordNueva": "EquinoDietaNueva8426Zk"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 204", function () {
+          pm.response.to.have.status(204);
+      });
+      if (pm.response.code === 204) { pm.environment.set("password", "EquinoDietaNueva8426Zk"); }
+order: 5000

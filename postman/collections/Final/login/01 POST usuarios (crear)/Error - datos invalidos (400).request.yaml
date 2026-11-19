@@ -1,0 +1,35 @@
+$kind: http-request
+name: "Error - datos invalidos (400)"
+url: "{{usuarios_url}}/api/usuarios"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "nombre": "",
+      "correo": "no-es-correo",
+      "password": "123"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 400", function () {
+          pm.response.to.have.status(400);
+      });
+      pm.test("Cuerpo de error uniforme", function () {
+          const b = pm.response.json();
+          pm.expect(b.status).to.eql(400);
+          pm.expect(b).to.have.property("mensaje");
+      });
+      pm.test("Lista los 3 campos con error", function () {
+          const d = pm.response.json().detalles;
+          pm.expect(d.length).to.eql(3);
+          pm.expect(d.join(" ")).to.include("correo").and.include("nombre").and.include("password");
+      });
+order: 3000

@@ -1,0 +1,30 @@
+$kind: http-request
+name: "Error - correo repetido (409)"
+url: "{{usuarios_url}}/api/usuarios"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "nombre": "Otra Ana",
+      "correo": "{{correo}}",
+      "password": "EquinoDietaPrueba7319Xq"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 409", function () {
+          pm.response.to.have.status(409);
+      });
+      pm.test("Cuerpo de error uniforme", function () {
+          const b = pm.response.json();
+          pm.expect(b.status).to.eql(409);
+          pm.expect(b).to.have.property("mensaje");
+      });
+order: 4000

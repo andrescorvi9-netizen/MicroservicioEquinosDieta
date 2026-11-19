@@ -1,0 +1,30 @@
+$kind: http-request
+name: "Correcto - registrar segundo caballo (201)"
+url: "{{caballos_url}}/api/caballos"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "nombre": "Brisa",
+      "codigo": "{{codigo_caballo_2}}",
+      "pesoKg": 320.5,
+      "categoria": "joven",
+      "estadoSalud": "sin_complicaciones"
+    }
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      pm.environment.set("codigo_caballo_2", pm.environment.get("codigo_caballo") + "-B");
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 201", function () {
+          pm.response.to.have.status(201);
+      });
+      pm.environment.set("id_caballo_2", pm.response.json().id);
+order: 2000

@@ -1,0 +1,27 @@
+$kind: http-request
+name: "C genera una dieta (201)"
+url: "{{dietas_url}}/api/dietas"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "caballoId": {{id_caballo_c}}
+    }
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: "{{token_c}}"
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 201", function () {
+          pm.response.to.have.status(201);
+      });
+      pm.environment.set("id_dieta_c", pm.response.json().id);
+order: 4000

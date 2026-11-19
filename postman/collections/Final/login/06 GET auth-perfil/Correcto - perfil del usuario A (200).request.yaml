@@ -1,0 +1,17 @@
+$kind: http-request
+name: "Correcto - perfil del usuario A (200)"
+url: "{{usuarios_url}}/api/auth/perfil"
+method: GET
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Datos del usuario A", function () {
+          const b = pm.response.json();
+          pm.expect(b.id).to.eql(Number(pm.environment.get("id_usuario")));
+          pm.expect(b.nombre).to.eql("Ana Maria Torres");
+      });
+order: 1000

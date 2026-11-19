@@ -1,0 +1,26 @@
+# Plantilla de configuracion. Copia este archivo como application.properties
+# y define las variables DB_PASSWORD, JWT_SECRET e INTERNAL_KEY con tus valores.
+# No escribas valores reales en esta plantilla.
+
+spring.application.name=registro-caballo
+server.port=${PORT:8082}
+
+# Base de datos compartida; este servicio solo usa el esquema "caballos"
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/Equino_Dieta}
+spring.datasource.username=${DB_USER:postgres}
+spring.datasource.password=${DB_PASSWORD}
+spring.datasource.hikari.maximum-pool-size=5
+
+# Flyway crea el esquema y las tablas; Hibernate solo valida que coincidan con las entidades
+spring.flyway.schemas=caballos
+spring.flyway.default-schema=caballos
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.properties.hibernate.default_schema=caballos
+spring.jpa.open-in-view=false
+
+# Seguridad (definir como variables de entorno fuera del entorno local)
+app.jwt.secret=${JWT_SECRET}
+app.internal-key=${INTERNAL_KEY}
+
+# Otros microservicios
+app.notificaciones.url=${NOTIFICACIONES_URL:http://localhost:8084}

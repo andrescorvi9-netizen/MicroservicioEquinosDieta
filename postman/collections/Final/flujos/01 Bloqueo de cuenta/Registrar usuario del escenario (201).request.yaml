@@ -1,0 +1,30 @@
+$kind: http-request
+name: "Registrar usuario del escenario (201)"
+url: "{{usuarios_url}}/api/usuarios"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "nombre": "Usuario Bloqueo",
+      "correo": "{{correo_bloqueo}}",
+      "password": "EquinoDietaPrueba7319Xq"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      pm.environment.set("correo_bloqueo", "bloqueo." + pm.environment.get("ts") + "@correo.com");
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 201", function () {
+          pm.response.to.have.status(201);
+      });
+      pm.environment.set("id_usuario_bloqueo", pm.response.json().id);
+order: 1000

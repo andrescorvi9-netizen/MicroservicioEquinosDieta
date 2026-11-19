@@ -1,0 +1,24 @@
+$kind: http-request
+name: "Correcto - lista paginada (200)"
+url: "{{caballos_url}}/api/caballos?page=0&size=10"
+method: GET
+queryParams:
+  - key: "page"
+    value: "0"
+  - key: "size"
+    value: "10"
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Pagina con los 2 caballos del usuario", function () {
+          const b = pm.response.json();
+          pm.expect(b.pagina).to.eql(0);
+          pm.expect(b.tamano).to.eql(10);
+          pm.expect(b.totalElementos).to.eql(2);
+          pm.expect(b.contenido.map(c => c.id)).to.include(Number(pm.environment.get("id_caballo")));
+      });
+order: 1000

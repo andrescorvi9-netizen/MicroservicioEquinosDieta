@@ -1,0 +1,24 @@
+$kind: http-request
+name: "Correcto - actualizar observaciones (200)"
+url: "{{dietas_url}}/api/dietas/{{id_dieta}}"
+method: PUT
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "observaciones": "Revisar condicion corporal en 15 dias"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Observaciones guardadas", function () {
+          pm.expect(pm.response.json().observaciones).to.eql("Revisar condicion corporal en 15 dias");
+      });
+order: 1000

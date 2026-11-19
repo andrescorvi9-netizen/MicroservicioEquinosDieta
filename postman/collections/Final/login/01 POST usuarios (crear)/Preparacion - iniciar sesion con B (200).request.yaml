@@ -1,0 +1,26 @@
+$kind: http-request
+name: "Preparacion - iniciar sesion con B (200)"
+description: "Deja el token de B para los casos de recurso ajeno."
+url: "{{usuarios_url}}/api/auth/login"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "correo": "{{correo_b}}",
+      "password": "{{password_b}}"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.environment.set("token_b", pm.response.json().token);
+order: 6000

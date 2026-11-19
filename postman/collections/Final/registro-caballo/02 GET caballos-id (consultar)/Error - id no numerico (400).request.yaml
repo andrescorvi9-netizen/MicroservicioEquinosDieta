@@ -1,0 +1,17 @@
+$kind: http-request
+name: "Error - id no numerico (400)"
+url: "{{caballos_url}}/api/caballos/abc"
+method: GET
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 400", function () {
+          pm.response.to.have.status(400);
+      });
+      pm.test("Cuerpo de error uniforme", function () {
+          const b = pm.response.json();
+          pm.expect(b.status).to.eql(400);
+          pm.expect(b).to.have.property("mensaje");
+      });
+order: 4000

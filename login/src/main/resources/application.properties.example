@@ -1,0 +1,34 @@
+# Plantilla de configuracion. Copia este archivo como application.properties
+# y define las variables DB_PASSWORD, JWT_SECRET e INTERNAL_KEY con tus valores.
+# No escribas valores reales en esta plantilla.
+
+spring.application.name=login
+server.port=${PORT:8081}
+
+
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/Equino_Dieta}
+spring.datasource.username=${DB_USER:postgres}
+spring.datasource.password=${DB_PASSWORD}
+spring.datasource.hikari.maximum-pool-size=5
+
+# Flyway
+spring.flyway.schemas=auth
+spring.flyway.default-schema=auth
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.properties.hibernate.default_schema=auth
+spring.jpa.open-in-view=false
+
+# Seguridad
+app.jwt.secret=${JWT_SECRET}
+app.jwt.expiration-minutes=${JWT_EXPIRATION_MINUTES:60}
+app.internal-key=${INTERNAL_KEY}
+
+# Otros microservicios
+app.caballos.url=${CABALLOS_URL:http://localhost:8082}
+app.dietas.url=${DIETAS_URL:http://localhost:8083}
+app.notificaciones.url=${NOTIFICACIONES_URL:http://localhost:8084}
+
+# API externa Have I Been Pwned - Pwned Passwords (gratuita, sin clave).
+# Usar HIBP_ENABLED=false en pruebas de carga y estres.
+app.hibp.enabled=${HIBP_ENABLED:true}
+app.hibp.url=${HIBP_URL:https://api.pwnedpasswords.com}

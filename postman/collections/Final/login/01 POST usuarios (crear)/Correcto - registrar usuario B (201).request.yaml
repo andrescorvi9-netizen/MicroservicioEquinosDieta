@@ -1,0 +1,26 @@
+$kind: http-request
+name: "Correcto - registrar usuario B (201)"
+url: "{{usuarios_url}}/api/usuarios"
+method: POST
+headers:
+  - key: "Content-Type"
+    value: "application/json"
+body:
+  type: json
+  content: |-
+    {
+      "nombre": "Beto Ruiz",
+      "correo": "{{correo_b}}",
+      "password": "{{password_b}}"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responde 201", function () {
+          pm.response.to.have.status(201);
+      });
+      pm.environment.set("id_usuario_b", pm.response.json().id);
+order: 2000
