@@ -1,0 +1,8 @@
+target/
+.idea/
+*.iml
+.mvn/
+mvnw
+mvnw.cmd
+# La configuracion local con valores de desarrollo nunca entra a la imagen
+src/main/resources/application.properties
