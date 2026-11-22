@@ -1,13 +1,16 @@
 package com.equinos.login.domain.usecase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
@@ -65,7 +68,7 @@ class UsuarioUseCaseTest {
     @InjectMocks
     private UsuarioUseCase useCase;
 
-    /** Usuario simulado con los datos que leen los casos de uso. */
+
     private static Usuario usuarioSimulado() {
         Usuario usuario = mock(Usuario.class);
         lenient().when(usuario.getId()).thenReturn(ID);
@@ -177,6 +180,40 @@ class UsuarioUseCaseTest {
     }
 
     @Test
+    void ActualizarConCambiosAvisaAlUsuario() {
+        //Arrange: el usuario simulado devuelve los datos nuevos despues de actualizarDatos
+        Usuario usuario = usuarioSimulado();
+        doAnswer(invocacion -> {
+            lenient().when(usuario.getNombre()).thenReturn(invocacion.getArgument(0));
+            lenient().when(usuario.getCorreo()).thenReturn(invocacion.getArgument(1));
+            return null;
+        }).when(usuario).actualizarDatos(anyString(), anyString(), any(Instant.class));
+        when(usuarios.buscarPorId(ID)).thenReturn(Optional.of(usuario));
+        when(usuarios.existePorCorreo("nuevo@correo.com")).thenReturn(false);
+        when(usuarios.guardar(usuario)).thenReturn(usuario);
+
+        //Act
+        useCase.actualizar(ID, ID, "Ana Maria", "nuevo@correo.com");
+
+        //Assert: el aviso lleva el correo que tenia antes del cambio
+        verify(notificaciones).cuentaActualizada(usuario, "ana@correo.com");
+    }
+
+    @Test
+    void ActualizarSinCambiosNoAvisa() {
+        //Arrange: mismo nombre y mismo correo
+        Usuario usuario = usuarioSimulado();
+        when(usuarios.buscarPorId(ID)).thenReturn(Optional.of(usuario));
+        when(usuarios.guardar(usuario)).thenReturn(usuario);
+
+        //Act
+        useCase.actualizar(ID, ID, "Ana", "ana@correo.com");
+
+        //Assert
+        verify(notificaciones, never()).cuentaActualizada(any(), anyString());
+    }
+
+    @Test
     void ActualizarCorreoConflicto() {
         //Arrange
         Usuario usuario = usuarioSimulado();
@@ -200,7 +237,7 @@ class UsuarioUseCaseTest {
         //Assert: el orden de la cascada es dietas, caballos y al final la cuenta
         InOrder orden = inOrder(dietas, caballos, usuarios);
         orden.verify(dietas).eliminarDietasDeUsuario(ID);
-        orden.verify(caballos).desactivarCaballosDeUsuario(ID);
+        orden.verify(caballos).eliminarCaballosDeUsuario(ID);
         orden.verify(usuarios).eliminarPorId(ID);
     }
 
@@ -240,7 +277,7 @@ class UsuarioUseCaseTest {
         //Arrange
         when(usuarios.existePorId(ID)).thenReturn(true);
         doThrow(new ServicioNoDisponibleException("registro-caballo no responde"))
-                .when(caballos).desactivarCaballosDeUsuario(ID);
+                .when(caballos).eliminarCaballosDeUsuario(ID);
 
         //Act y Assert
         assertThrows(ServicioNoDisponibleException.class, () -> useCase.eliminar(ID, ID));
@@ -379,5 +416,30 @@ class UsuarioUseCaseTest {
                 () -> useCase.cambiarPassword(ID, ID, "Clave12345", "ñ".repeat(40)));
         verify(usuario, never()).cambiarPassword(anyString(), any());
         verifyNoInteractions(passwordsFiltradas, notificaciones);
+    }
+
+    @Test
+    void correoDisponibleCuandoNoExisteUnaCuentaConEseCorreo() {
+        //Arrange
+        when(usuarios.existePorCorreo("ana@correo.com")).thenReturn(false);
+
+        //Act
+        boolean disponible = useCase.correoDisponible(" ANA@Correo.com ");
+
+        //Assert: el correo se normaliza antes de consultar
+        assertTrue(disponible);
+        verify(usuarios).existePorCorreo("ana@correo.com");
+    }
+
+    @Test
+    void correoNoDisponibleCuandoYaExisteUnaCuenta() {
+        //Arrange
+        when(usuarios.existePorCorreo("ana@correo.com")).thenReturn(true);
+
+        //Act
+        boolean disponible = useCase.correoDisponible("ana@correo.com");
+
+        //Assert
+        assertFalse(disponible);
     }
 }

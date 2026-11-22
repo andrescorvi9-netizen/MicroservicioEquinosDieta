@@ -3,6 +3,7 @@ package com.equinos.login.infraestructure.driver_adapters.external_repository;
 import com.equinos.login.domain.model.Usuario;
 import com.equinos.login.domain.model.gateway.NotificacionesGateway;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -44,8 +45,25 @@ public class NotificacionesGatewayImpl implements NotificacionesGateway {
         avisar(usuario, "CONTRASENA_CAMBIADA");
     }
 
+    @Override
+    public void cuentaActualizada(Usuario usuario, String correoAnterior) {
+        Map<String, String> datos = new HashMap<>(Map.of("nombre", usuario.getNombre(), "correo", usuario.getCorreo()));
+        boolean cambioCorreo = !usuario.getCorreo().equals(correoAnterior);
+        if (cambioCorreo) {
+            datos.put("correoAnterior", correoAnterior);
+        }
+        enviar(new NotificacionRemota(usuario.getCorreo(), usuario.getNombre(), "CUENTA_ACTUALIZADA", datos));
+        if (cambioCorreo) {
+            // El dueño real de la cuenta se entera aunque alguien haya cambiado el correo
+            enviar(new NotificacionRemota(correoAnterior, usuario.getNombre(), "CUENTA_ACTUALIZADA", datos));
+        }
+    }
+
     private void avisar(Usuario usuario, String tipo) {
-        NotificacionRemota notificacion = new NotificacionRemota(usuario.getCorreo(), usuario.getNombre(), tipo, Map.of());
+        enviar(new NotificacionRemota(usuario.getCorreo(), usuario.getNombre(), tipo, Map.of()));
+    }
+
+    private void enviar(NotificacionRemota notificacion) {
         executor.execute(() -> publicar(notificacion));
     }
 

@@ -34,7 +34,7 @@ public class UsuarioUseCase {
     private final PasswordFiltradaGateway passwordsFiltradas;
     private final NotificacionesGateway notificaciones;
 
-    /** Sin transacción a propósito: la consulta a la API externa no debe retener una conexión a la base. */
+
     public Usuario registrar(RegistrarUsuarioCommand comando) {
         String correo = Usuario.normalizarCorreo(comando.correo());
         if (usuarios.existePorCorreo(correo)) {
@@ -60,8 +60,14 @@ public class UsuarioUseCase {
         if (!nuevoCorreo.equals(usuario.getCorreo()) && usuarios.existePorCorreo(nuevoCorreo)) {
             throw new ConflictoException("Ya existe una cuenta con ese correo");
         }
+        String nombreAnterior = usuario.getNombre();
+        String correoAnterior = usuario.getCorreo();
         usuario.actualizarDatos(nombre, nuevoCorreo, Instant.now());
-        return usuarios.guardar(usuario);
+        Usuario guardado = usuarios.guardar(usuario);
+        if (!usuario.getNombre().equals(nombreAnterior) || !usuario.getCorreo().equals(correoAnterior)) {
+            notificaciones.cuentaActualizada(usuario, correoAnterior);
+        }
+        return guardado;
     }
 
 
@@ -70,7 +76,7 @@ public class UsuarioUseCase {
             throw new RecursoNoEncontradoException(NO_ENCONTRADO);
         }
         dietas.eliminarDietasDeUsuario(id);
-        caballos.desactivarCaballosDeUsuario(id);
+        caballos.eliminarCaballosDeUsuario(id);
         usuarios.eliminarPorId(id);
     }
 
@@ -96,7 +102,7 @@ public class UsuarioUseCase {
     }
 
 
-    /** BCrypt admite 72 bytes, y las tildes o la ñ ocupan más de un byte por carácter. */
+
     private static void rechazarSiEsMuyLarga(String password) {
         if (password.getBytes(StandardCharsets.UTF_8).length > MAX_BYTES_PASSWORD) {
             throw new ReglaNegocioException("La contraseña es demasiado larga; usa menos caracteres o evita tildes y ñ");

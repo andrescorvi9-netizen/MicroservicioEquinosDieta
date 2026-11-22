@@ -5,7 +5,6 @@ import com.equinos.registrocaballo.domain.model.Categoria;
 import com.equinos.registrocaballo.domain.model.EstadoSalud;
 import com.equinos.registrocaballo.domain.model.Pagina;
 
-import java.time.Instant;
 import java.util.Optional;
 
 /** Gateway: persistencia de caballos. */
@@ -29,6 +28,6 @@ public interface CaballoGateway {
     Pagina<Caballo> buscarActivos(Long usuarioId, Categoria categoria, EstadoSalud estadoSalud, int pagina,
                                   int tamano);
 
-    /** Baja lógica de todos los caballos activos del usuario. Devuelve cuántos dio de baja. */
-    int desactivarActivosDeUsuario(Long usuarioId, Instant ahora);
+    /** Borra de la tabla todos los caballos del usuario, incluidos los dados de baja. Devuelve cuántos borró. */
+    int eliminarTodosDeUsuario(Long usuarioId);
 }

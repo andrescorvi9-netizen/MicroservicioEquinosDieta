@@ -21,7 +21,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-/** Pruebas de CaballosGatewayImpl. RestTemplate es simulado: no se hace ninguna llamada HTTP real. */
+
 @ExtendWith(MockitoExtension.class)
 class CaballosGatewayImplTest {
 
@@ -42,9 +42,9 @@ class CaballosGatewayImplTest {
 
     @Test
     @SuppressWarnings({"rawtypes", "unchecked"})
-    void desactivarLlamaARegistroCaballoConElEncabezadoInterno() {
+    void eliminarLlamaARegistroCaballoConElEncabezadoInterno() {
         //Act
-        gateway.desactivarCaballosDeUsuario(USUARIO_ID);
+        gateway.eliminarCaballosDeUsuario(USUARIO_ID);
 
         //Assert
         ArgumentCaptor<HttpEntity> entidad = ArgumentCaptor.forClass(HttpEntity.class);
@@ -61,7 +61,7 @@ class CaballosGatewayImplTest {
 
         //Act
         ServicioNoDisponibleException error = assertThrows(ServicioNoDisponibleException.class,
-                () -> gateway.desactivarCaballosDeUsuario(USUARIO_ID));
+                () -> gateway.eliminarCaballosDeUsuario(USUARIO_ID));
 
         //Assert
         assertTrue(error.getMessage().contains("registro-caballo"));

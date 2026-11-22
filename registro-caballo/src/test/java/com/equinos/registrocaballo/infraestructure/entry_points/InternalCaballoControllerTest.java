@@ -24,15 +24,15 @@ class InternalCaballoControllerTest {
     private InternalCaballoController controller;
 
     @Test
-    void desactivarPorUsuarioIndicaCuantosCaballosDioDeBaja() {
+    void eliminarPorUsuarioIndicaCuantosCaballosBorro() {
         //Arrange
-        when(caballoUseCase.desactivarTodosDeUsuario(USUARIO_ID)).thenReturn(3);
+        when(caballoUseCase.eliminarTodosDeUsuario(USUARIO_ID)).thenReturn(3);
 
         //Act
-        InternalCaballoController.BajaUsuarioResponse respuesta = controller.desactivarPorUsuario(USUARIO_ID);
+        InternalCaballoController.LimpiezaUsuarioResponse respuesta = controller.eliminarPorUsuario(USUARIO_ID);
 
         //Assert
         assertEquals(USUARIO_ID, respuesta.usuarioId());
-        assertEquals(3, respuesta.caballosDesactivados());
+        assertEquals(3, respuesta.caballosEliminados());
     }
 }

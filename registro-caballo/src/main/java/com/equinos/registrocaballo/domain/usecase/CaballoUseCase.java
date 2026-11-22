@@ -119,8 +119,8 @@ public class CaballoUseCase {
     }
 
     @Transactional
-    public int desactivarTodosDeUsuario(Long usuarioId) {
-        return caballos.desactivarActivosDeUsuario(usuarioId, Instant.now());
+    public int eliminarTodosDeUsuario(Long usuarioId) {
+        return caballos.eliminarTodosDeUsuario(usuarioId);
     }
 
     private static void validarPaginacion(int pagina, int tamano) {

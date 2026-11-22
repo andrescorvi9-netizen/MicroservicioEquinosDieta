@@ -1,6 +1,7 @@
 package com.equinos.notificaciones.domain.usecase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
@@ -79,5 +80,30 @@ class NotificacionUseCaseTest {
 
         //Assert
         assertTrue(mensaje.cuerpo().contains("cambió a: colicos"));
+    }
+
+    @Test
+    void cuentaActualizadaMuestraLosDatosNuevos() {
+        //Act
+        MensajeCorreo mensaje = mensajeDe(TipoNotificacion.CUENTA_ACTUALIZADA,
+                Map.of("nombre", "Ana Maria", "correo", "ana@correo.com"));
+
+        //Assert
+        assertEquals(TipoNotificacion.CUENTA_ACTUALIZADA.asunto(), mensaje.asunto());
+        assertTrue(mensaje.cuerpo().contains("- Nombre: Ana Maria"));
+        assertTrue(mensaje.cuerpo().contains("- Correo: ana@correo.com"));
+        assertFalse(mensaje.cuerpo().contains("Correo anterior"));
+        assertTrue(mensaje.cuerpo().contains("Si no fuiste tú"));
+    }
+
+    @Test
+    void cuentaActualizadaConCambioDeCorreoMuestraElAnterior() {
+        //Act
+        MensajeCorreo mensaje = mensajeDe(TipoNotificacion.CUENTA_ACTUALIZADA,
+                Map.of("nombre", "Ana", "correo", "nuevo@correo.com", "correoAnterior", "ana@correo.com"));
+
+        //Assert
+        assertTrue(mensaje.cuerpo().contains("- Correo: nuevo@correo.com"));
+        assertTrue(mensaje.cuerpo().contains("- Correo anterior: ana@correo.com"));
     }
 }

@@ -1,6 +1,5 @@
 package com.equinos.registrocaballo.infraestructure.driver_adapters.jpa_repository;
 
-import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -33,9 +32,8 @@ public interface CaballoDataJpaRepository extends JpaRepository<CaballoData, Lon
     Page<CaballoData> findByUsuarioIdAndActivoTrueAndCategoriaAndEstadoSalud(Long usuarioId, String categoria,
                                                                                String estadoSalud, Pageable pageable);
 
-    /** Baja lógica masiva: la usa la eliminación de la cuenta del usuario. */
+    /** Borrado físico de todos los caballos del usuario, activos o dados de baja: lo usa la eliminación de la cuenta. */
     @Modifying
-    @Query("update CaballoData c set c.activo = false, c.actualizadoEn = :ahora "
-            + "where c.usuarioId = :usuarioId and c.activo = true")
-    int desactivarActivosDeUsuario(@Param("usuarioId") Long usuarioId, @Param("ahora") Instant ahora);
+    @Query("delete from CaballoData c where c.usuarioId = :usuarioId")
+    int eliminarTodosDeUsuario(@Param("usuarioId") Long usuarioId);
 }

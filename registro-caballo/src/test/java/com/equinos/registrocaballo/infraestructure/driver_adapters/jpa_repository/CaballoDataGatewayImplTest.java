@@ -250,13 +250,12 @@ class CaballoDataGatewayImplTest {
     }
 
     @Test
-    void desactivarActivosDeUsuarioDevuelveCuantosDioDeBaja() {
+    void eliminarTodosDeUsuarioDevuelveCuantosBorro() {
         //Arrange
-        Instant ahora = Instant.parse("2026-01-01T10:00:00Z");
-        when(repositorio.desactivarActivosDeUsuario(USUARIO_ID, ahora)).thenReturn(4);
+        when(repositorio.eliminarTodosDeUsuario(USUARIO_ID)).thenReturn(4);
 
         //Act
-        int resultado = gateway.desactivarActivosDeUsuario(USUARIO_ID, ahora);
+        int resultado = gateway.eliminarTodosDeUsuario(USUARIO_ID);
 
         //Assert
         assertEquals(4, resultado);

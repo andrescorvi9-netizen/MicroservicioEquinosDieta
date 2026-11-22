@@ -19,12 +19,12 @@ public class InternalCaballoController {
 
     private final CaballoUseCase caballoUseCase;
 
-    /** Baja lógica de todos los caballos del usuario. La llama login al eliminar la cuenta. */
+    /** Borrado físico de todos los caballos del usuario. La llama login al eliminar la cuenta. */
     @DeleteMapping("/usuario/{usuarioId}")
-    public BajaUsuarioResponse desactivarPorUsuario(@PathVariable("usuarioId") Long usuarioId) {
-        return new BajaUsuarioResponse(usuarioId, caballoUseCase.desactivarTodosDeUsuario(usuarioId));
+    public LimpiezaUsuarioResponse eliminarPorUsuario(@PathVariable("usuarioId") Long usuarioId) {
+        return new LimpiezaUsuarioResponse(usuarioId, caballoUseCase.eliminarTodosDeUsuario(usuarioId));
     }
 
-    public record BajaUsuarioResponse(Long usuarioId, int caballosDesactivados) {
+    public record LimpiezaUsuarioResponse(Long usuarioId, int caballosEliminados) {
     }
 }

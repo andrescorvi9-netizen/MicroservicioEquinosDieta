@@ -7,10 +7,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.equinos.login.domain.model.Usuario;
+
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -87,5 +91,35 @@ class NotificacionesGatewayImplTest {
 
         //Act y Assert
         assertDoesNotThrow(() -> gateway.bienvenida(usuarioSimulado()));
+    }
+
+    @Test
+    void cuentaActualizadaSinCambioDeCorreoAvisaUnaVezConLosDatosNuevos() {
+        //Act
+        gateway.cuentaActualizada(usuarioSimulado(), "ana@correo.com");
+
+        //Assert
+        NotificacionesGatewayImpl.NotificacionRemota cuerpo =
+                (NotificacionesGatewayImpl.NotificacionRemota) peticionEnviada().getBody();
+        assertEquals("CUENTA_ACTUALIZADA", cuerpo.tipo());
+        assertEquals("ana@correo.com", cuerpo.correo());
+        assertEquals(Map.of("nombre", "Ana", "correo", "ana@correo.com"), cuerpo.datos());
+    }
+
+    @Test
+    void cuentaActualizadaConCambioDeCorreoAvisaTambienAlCorreoAnterior() {
+        //Act
+        gateway.cuentaActualizada(usuarioSimulado(), "anterior@correo.com");
+
+        //Assert: un aviso al correo nuevo y otro al anterior, los dos con el correo anterior en los datos
+        ArgumentCaptor<HttpEntity<?>> peticiones = ArgumentCaptor.forClass(HttpEntity.class);
+        verify(restTemplate, times(2)).postForEntity(eq(RUTA), peticiones.capture(), eq(Void.class));
+        List<String> destinatarios = peticiones.getAllValues().stream()
+                .map(p -> ((NotificacionesGatewayImpl.NotificacionRemota) p.getBody()).correo()).toList();
+        assertEquals(List.of("ana@correo.com", "anterior@correo.com"), destinatarios);
+        NotificacionesGatewayImpl.NotificacionRemota cuerpo =
+                (NotificacionesGatewayImpl.NotificacionRemota) peticiones.getAllValues().get(1).getBody();
+        assertEquals("anterior@correo.com", cuerpo.datos().get("correoAnterior"));
+        assertEquals("ana@correo.com", cuerpo.datos().get("correo"));
     }
 }

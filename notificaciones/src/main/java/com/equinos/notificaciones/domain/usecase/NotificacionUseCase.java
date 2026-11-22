@@ -25,6 +25,11 @@ public class NotificacionUseCase {
                     + "y generar sus dietas.";
             case CONTRASENA_CAMBIADA -> "La contraseña de tu cuenta se cambió correctamente. Si no fuiste tú, "
                     + "cambia tu contraseña lo antes posible.";
+            case CUENTA_ACTUALIZADA -> "Los datos de tu cuenta en DietaEquinos se actualizaron.\n\nDatos actuales:\n"
+                    + "- Nombre: " + n.dato("nombre") + "\n"
+                    + "- Correo: " + n.dato("correo") + "\n"
+                    + (n.datos().containsKey("correoAnterior") ? "- Correo anterior: " + n.dato("correoAnterior") + "\n" : "")
+                    + "\nSi no fuiste tú, cambia tu contraseña lo antes posible.";
             case DIETA_GENERADA -> "Se generó una dieta para " + caballo(n) + ".\n\nRación diaria (materia seca):\n"
                     + "- Total: " + n.dato("msTotalKg") + " kg\n"
                     + "- Forraje: " + n.dato("forrajeKg") + " kg\n"

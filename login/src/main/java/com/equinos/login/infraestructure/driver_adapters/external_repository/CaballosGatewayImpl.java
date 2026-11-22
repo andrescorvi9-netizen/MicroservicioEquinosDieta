@@ -12,7 +12,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Llamada interna a registro-caballo, para dar de baja los caballos del usuario, con el encabezado X-Internal-Key.
+ * Llamada interna a registro-caballo, para borrar los caballos del usuario, con el encabezado X-Internal-Key.
  * Es síncrona a propósito: la cuenta solo se borra si esta llamada salió bien.
  */
 @Component
@@ -30,14 +30,14 @@ public class CaballosGatewayImpl implements CaballosGateway {
     }
 
     @Override
-    public void desactivarCaballosDeUsuario(Long usuarioId) {
+    public void eliminarCaballosDeUsuario(Long usuarioId) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Internal-Key", claveInterna);
         try {
             restTemplate.exchange(url + "/api/internal/caballos/usuario/{usuarioId}",
                     HttpMethod.DELETE, new HttpEntity<>(headers), Void.class, usuarioId);
         } catch (RestClientException ex) {
-            throw new ServicioNoDisponibleException("No fue posible dar de baja los caballos de la cuenta: "
+            throw new ServicioNoDisponibleException("No fue posible borrar los caballos de la cuenta: "
                     + "el servicio registro-caballo no respondió. La cuenta no se eliminó; intente de nuevo más tarde");
         }
     }

@@ -31,10 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Pruebas de AutenticacionUseCase. Los gateways, el usuario y el token son simulados con Mockito:
- * el usuario simulado responde si está bloqueado o si el intento fallido lo bloquea.
- */
+
 @ExtendWith(MockitoExtension.class)
 class AutenticacionUseCaseTest {
 
@@ -50,7 +47,7 @@ class AutenticacionUseCaseTest {
     @InjectMocks
     private AutenticacionUseCase useCase;
 
-    /** Usuario simulado con correo, hash de la clave y si está bloqueado o no. */
+
     private static Usuario usuarioSimulado(boolean bloqueado) {
         Usuario usuario = mock(Usuario.class);
         lenient().when(usuario.getId()).thenReturn(ID);
@@ -103,7 +100,7 @@ class AutenticacionUseCaseTest {
         CredencialesInvalidasException error = assertThrows(CredencialesInvalidasException.class,
                 () -> useCase.iniciarSesion("ana@correo.com", "mala"));
 
-        //Assert: se suma el intento, se guarda y no se emite token
+        //Assert
         assertEquals("Correo o contraseña incorrectos", error.getMessage());
         verify(usuario).registrarIntentoFallido(any(Instant.class));
         verify(usuarios).guardar(usuario);
@@ -141,7 +138,7 @@ class AutenticacionUseCaseTest {
         CuentaBloqueadaException error = assertThrows(CuentaBloqueadaException.class,
                 () -> useCase.iniciarSesion("ana@correo.com", "Clave12345"));
 
-        //Assert: ni se revisa la clave
+        //Assert
         assertEquals(hasta, error.getBloqueadoHasta());
         verifyNoInteractions(hasher, tokens);
         verify(usuarios, never()).guardar(any());
@@ -149,7 +146,7 @@ class AutenticacionUseCaseTest {
 
     @Test
     void BloqueoVencido() {
-        //Arrange: tuvo un bloqueo, pero ya pasó, así que el usuario simulado no está bloqueado
+        //Arrange
         Usuario usuario = usuarioSimulado(false);
         lenient().when(usuario.getBloqueadoHasta()).thenReturn(Instant.parse("2020-01-01T00:00:00Z"));
         TokenEmitido token = mock(TokenEmitido.class);

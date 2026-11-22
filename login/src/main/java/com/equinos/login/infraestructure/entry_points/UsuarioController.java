@@ -70,6 +70,6 @@ public class UsuarioController {
     /** Consulta pública: indica si un correo está libre para registrarse. */
     @GetMapping("/disponibilidad")
     public DisponibilidadResponse disponibilidad(@RequestParam("correo") String correo) {
-        return new DisponibilidadResponse(Usuario.normalizarCorreo(correo), usuarioUseCase.correoDisponible(correo));
+        return DisponibilidadResponse.de(Usuario.normalizarCorreo(correo), usuarioUseCase.correoDisponible(correo));
     }
 }

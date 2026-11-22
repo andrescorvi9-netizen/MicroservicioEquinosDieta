@@ -1,11 +1,9 @@
 package com.equinos.login.infraestructure.entry_points;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -195,7 +193,7 @@ class UsuarioControllerTest {
 
         //Assert
         assertEquals("ana@correo.com", respuesta.correo());
-        assertTrue(respuesta.disponible());
+        assertEquals("No existe una cuenta con ese correo", respuesta.mensaje());
     }
 
     @Test
@@ -207,6 +205,6 @@ class UsuarioControllerTest {
         DisponibilidadResponse respuesta = controller.disponibilidad("ana@correo.com");
 
         //Assert
-        assertFalse(respuesta.disponible());
+        assertEquals("Ya existe una cuenta con ese correo", respuesta.mensaje());
     }
 }

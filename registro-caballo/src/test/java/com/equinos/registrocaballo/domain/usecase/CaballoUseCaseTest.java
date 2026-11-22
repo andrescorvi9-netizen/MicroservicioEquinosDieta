@@ -402,15 +402,15 @@ class CaballoUseCaseTest {
     }
 
     @Test
-    void laBajaInternaDevuelveCuantosCaballosDesactivo() {
+    void laLimpiezaInternaDevuelveCuantosCaballosBorro() {
         //Arrange
-        when(caballos.desactivarActivosDeUsuario(eq(USUARIO_ID), any(Instant.class))).thenReturn(2);
+        when(caballos.eliminarTodosDeUsuario(USUARIO_ID)).thenReturn(2);
 
         //Act
-        int desactivados = useCase.desactivarTodosDeUsuario(USUARIO_ID);
+        int eliminados = useCase.eliminarTodosDeUsuario(USUARIO_ID);
 
         //Assert
-        assertEquals(2, desactivados);
+        assertEquals(2, eliminados);
     }
 
     @Test

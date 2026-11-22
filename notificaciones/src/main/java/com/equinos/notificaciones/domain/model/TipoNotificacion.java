@@ -4,6 +4,7 @@ package com.equinos.notificaciones.domain.model;
 public enum TipoNotificacion {
     BIENVENIDA("Bienvenido a DietaEquinos"),
     CONTRASENA_CAMBIADA("Tu contraseña de DietaEquinos cambió"),
+    CUENTA_ACTUALIZADA("Los datos de tu cuenta de DietaEquinos cambiaron"),
     DIETA_GENERADA("Nueva dieta generada en DietaEquinos"),
     ESTADO_SALUD_CAMBIADO("Cambió el estado de salud de tu caballo");
 

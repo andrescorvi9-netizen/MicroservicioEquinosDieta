@@ -75,8 +75,8 @@ public class CaballoDataGatewayImpl implements CaballoGateway {
     }
 
     @Override
-    public int desactivarActivosDeUsuario(Long usuarioId, Instant ahora) {
-        return repositorio.desactivarActivosDeUsuario(usuarioId, ahora);
+    public int eliminarTodosDeUsuario(Long usuarioId) {
+        return repositorio.eliminarTodosDeUsuario(usuarioId);
     }
 
     private static Pageable porNombre(int pagina, int tamano) {
