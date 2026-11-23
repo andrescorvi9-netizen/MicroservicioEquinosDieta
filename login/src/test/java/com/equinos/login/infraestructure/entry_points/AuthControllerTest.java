@@ -15,6 +15,7 @@ import com.equinos.login.domain.usecase.AutenticacionUseCase;
 import com.equinos.login.infraestructure.security.UsuarioAutenticado;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,12 +23,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/** Pruebas de AuthController. El caso de uso, la petición, el usuario y el token son simulados. */
+/** Pruebas de AuthController */
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
 
     private static final Long ID = 1L;
     private static final Instant FECHA = Instant.parse("2026-01-01T10:00:00Z");
+    /** La misma FECHA vista en la hora de Colombia (UTC-5) */
+    private static final OffsetDateTime FECHA_COLOMBIA = OffsetDateTime.parse("2026-01-01T05:00:00-05:00");
 
     @Mock
     private AutenticacionUseCase autenticacionUseCase;
@@ -77,7 +80,7 @@ class AuthControllerTest {
         //Assert
         assertEquals("token-simulado", respuesta.token());
         assertEquals("Bearer", respuesta.tipo());
-        assertEquals(FECHA, respuesta.expiraEn());
+        assertEquals(FECHA_COLOMBIA, respuesta.expiraEn());
         assertEquals(ID, respuesta.usuario().id());
         assertEquals("ana@correo.com", respuesta.usuario().correo());
     }
@@ -136,7 +139,7 @@ class AuthControllerTest {
         assertEquals(ID, respuesta.id());
         assertEquals("Ana", respuesta.nombre());
         assertEquals("ana@correo.com", respuesta.correo());
-        assertEquals(FECHA, respuesta.creadoEn());
-        assertEquals(FECHA, respuesta.actualizadoEn());
+        assertEquals(FECHA_COLOMBIA, respuesta.creadoEn());
+        assertEquals(FECHA_COLOMBIA, respuesta.actualizadoEn());
     }
 }

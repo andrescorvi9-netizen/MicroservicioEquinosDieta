@@ -14,6 +14,7 @@ import com.equinos.login.domain.exception.ReglaNegocioException;
 import com.equinos.login.domain.exception.ServicioNoDisponibleException;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +34,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-/** Pruebas de GlobalExceptionHandler: cada excepción debe terminar en su código HTTP. */
+/** Pruebas de GlobalExceptionHandler */
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
 
@@ -114,6 +115,20 @@ class GlobalExceptionHandlerTest {
 
         //Assert
         verificar(respuesta, HttpStatus.LOCKED, error.getMessage());
+    }
+
+    @Test
+    void cuentaBloqueadaMuestraLaHoraDeColombia() {
+        //Arrange
+        CuentaBloqueadaException error = new CuentaBloqueadaException(Instant.parse("2030-01-01T00:15:00Z"));
+
+        //Act
+        ResponseEntity<ErrorApi> respuesta = handler.cuentaBloqueada(error, request);
+
+        //Assert
+        assertEquals("La cuenta está bloqueada hasta el 2029-12-31 a las 19:15 (hora de Colombia, UTC-5)",
+                respuesta.getBody().mensaje());
+        assertEquals(ZoneOffset.ofHours(-5), respuesta.getBody().timestamp().getOffset());
     }
 
     @Test
